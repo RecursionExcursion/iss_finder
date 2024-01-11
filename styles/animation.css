@@ -1,0 +1,70 @@
+.planet {
+    position: absolute;
+    height: 350px;
+    width: 350px;
+    transform: translate(-50%, 50%);
+    left: 50%;
+    top: 0%;
+    z-index: 0;
+}
+
+.earth {
+    width: 300px;
+    height: 300px;
+    background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Whole_world_-_land_and_oceans.jpg/800px-Whole_world_-_land_and_oceans.jpg?20140915121052');
+    background-size: 600px 100%;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: inset 0 0 #fdfff29e, inset 30px 0px 50px #000;
+    animation: spin 25s infinite linear;
+}
+
+@keyframes spin {
+    0% {
+        background-position-x: 0px;
+    }
+
+    100% {
+        background-position-x: 600px;
+    }
+}
+
+.satelite {
+    position: absolute;
+    left: 8%;
+    top: 100%;
+    animation: rotate-satelite 10s ease-in-out infinite;
+    z-index: 1;
+    height:5rem;
+    width: 5rem;
+}
+
+@keyframes rotate-satelite {
+    
+    25% {
+        height:7rem;
+        width: 7rem;
+    }
+    49% {
+        top: -10%;
+        z-index: 1;
+    }
+    50% {
+        left: 70%;
+        z-index: -1;
+        height:5rem;
+        width: 5rem;
+    }
+
+    75%{
+        height:3rem;
+        width: 3rem;
+    }
+
+    100% {
+        z-index: -1;
+    }
+}

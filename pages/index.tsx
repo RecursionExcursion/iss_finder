@@ -1,118 +1,204 @@
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
+import { NextPage } from "next";
+import { useEffect, useState } from "react";
 
-const inter = Inter({ subsets: ['latin'] })
+interface ISSData {
+  name: string;
+  id: number;
+  latitude: number;
+  longitude: number;
+  altitude: number;
+  velocity: number;
+  visibility: string;
+  footprint: number;
+  timestamp: number;
+  daynum: number;
+  solar_lat: number;
+  solar_lon: number;
+  units: string;
+}
 
-export default function Home() {
+const Home: NextPage<any> = (props) => {
+  const [location, setLocation] = useState<ISSData>();
+  const [distance, setDistance] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true)
+  const [isMiles, setIsMiles] = useState<boolean>(false)
+
+  useEffect(() => {
+    getUser().then((res) => {
+      setLocation(res);
+      let dist = Number(calcualteDistance(props.data, res).toFixed(2));
+      if (isMiles) {
+        dist *= 0.621371
+      }
+      setDistance(dist);
+    }).finally(() => setLoading(false));
+
+  }, []);
+
+  async function getUser(): Promise<ISSData> {
+    return new Promise((resolve, reject) => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+
+            const coords: ISSData = {
+              name: "user",
+              id: -1,
+              latitude: latitude,
+              longitude: longitude,
+              altitude: 0,
+              velocity: 0,
+              visibility: "string",
+              footprint: -1,
+              timestamp: -1,
+              daynum: -1,
+              solar_lat: -1,
+              solar_lon: -1,
+              units: "kilometers",
+            };
+
+            resolve(coords);
+          },
+          (error) => {
+            console.error(`Error getting location: ${error.message}`);
+            reject(error);
+          }
+        );
+      } else {
+        console.error("Geolocation is not supported by this browser.");
+        reject(new Error("Geolocation is not supported by this browser."));
+      }
+    });
+  }
+
+
+  const roundToTwoDec = (num: number) => {
+    return Number(num.toFixed(2))
+  }
+
+  const handleRadioChange = (event: any) => {
+    // Update the state based on the selected value
+
+    if (event.target.value === 'miles') {
+      setIsMiles(true);
+      setDistance(roundToTwoDec(distance * 0.621371))
+    } else {
+      setIsMiles(false);
+      setDistance(roundToTwoDec(distance * 1.60934))
+    }
+
+
+  };
+
   return (
-    <main
-      className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
-    >
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">pages/index.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <main className="min-h-screen flex flex-col items-center justify-center bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url('milkyway.jpeg')` }}>
+      <div className="planet">
+        <img src="iss-animation.jpg" alt="satelite" className="satelite" />
+        <div className="earth">
         </div>
       </div>
+      <div className="bg-black text-white mt-[400px] bg-opacity-50 p-4">
+        {loading ? (
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+          <>Loading...</>
 
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
+        ) : (
+          <div >
+            <div>
+              User Coords- Lat- {location?.latitude} Long- {location?.longitude}
+            </div>
+            <div>
+              ISS Coords- Lat- {props.data.latitude} Long- {props.data.longitude}
+            </div>
+            <div>
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
+              {isMiles ? (
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Discover and deploy boilerplate example Next.js&nbsp;projects.
-          </p>
-        </a>
+                <div>You are {distance} miles away from the Iss</div>
+              ) : (
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
+                <div>You are {distance} km away from the Iss</div>
+              )}
+              <form>
+                <label>
+                  <input
+                    type="radio"
+                    name="measurment"
+                    value="miles"
+                    checked={isMiles}
+                    onChange={handleRadioChange}
+                  />
+                  Miles
+                </label>
+
+                <label>
+                  <input
+                    type="radio"
+                    name="measurment"
+                    value="kilometers"
+                    checked={!isMiles}
+                    onChange={handleRadioChange}
+                  />
+                  Kilometers
+                </label>
+              </form>
+
+
+            </div>
+          </div>
+        )}
       </div>
     </main>
-  )
+  );
+};
+
+export const getServerSideProps = async () => {
+  const response = await fetch(
+    "https://api.wheretheiss.at/v1/satellites/25544"
+  );
+  if (!response.ok) {
+    throw new Error(`HTTP error! Status: ${response.status}`);
+  }
+
+  const issLocation = await response.json();
+
+  return {
+    props: {
+      data: issLocation,
+    },
+  };
+};
+
+function calcualteDistance(iss: ISSData, user: ISSData) {
+  //haversine formula
+
+  const earthRadius = 6371; // km
+
+  const lat1 = (iss.latitude * Math.PI) / 180;
+  const lat2 = (user.latitude * Math.PI) / 180;
+
+  const deltaLat = user.latitude - (iss.latitude * Math.PI) / 180;
+  const deltaLong = ((user.longitude - iss.longitude) * Math.PI) / 180;
+
+  const a =
+    Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+    Math.cos(lat1) *
+    Math.cos(lat2) *
+    Math.sin(deltaLong / 2) *
+    Math.sin(deltaLong / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  const d = earthRadius * c;
+
+  //pythagoras theorem
+
+  const hypotenuseSqrd = iss.altitude * iss.altitude + d * d;
+  const hypotenuse = Math.sqrt(hypotenuseSqrd);
+
+  return hypotenuse;
 }
+
+export default Home;
